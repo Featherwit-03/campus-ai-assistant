@@ -9,6 +9,12 @@ __pycache__/
 # 建库生成的索引（可随时重建）
 index/
 
+# 个人申请材料（不上传 GitHub）
+简历素材.md
+面试准备包.md
+简历模板.md
+项目讲解稿.md
+
 # 系统文件
 .DS_Store
 Thumbs.db
