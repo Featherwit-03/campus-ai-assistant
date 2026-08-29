@@ -1,0 +1,14 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# 密钥文件（绝不能提交到 GitHub）
+.env
+
+# 建库生成的索引（可随时重建）
+index/
+
+# 系统文件
+.DS_Store
+Thumbs.db
