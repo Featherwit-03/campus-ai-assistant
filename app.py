@@ -18,7 +18,7 @@ load_dotenv()
 
 INDEX_DIR = Path(__file__).parent / "index"
 EMBED_MODEL = "BAAI/bge-small-zh-v1.5"
-TOP_K = 8  # 检索时取最相似的几个片段（知识库较小时可调大，答案更完整）
+TOP_K = 6  # 检索时取最相似的几个片段（太大易混入无关内容，让模型误判"没有答案"）
 
 ASSETS_DIR = Path(__file__).parent / "assets"
 BANNER = ASSETS_DIR / "banner.jpg"  # 若 assets/ 下有 banner.jpg，会自动作为顶部横幅显示
@@ -69,8 +69,10 @@ def build_prompt(query: str, results):
         f"[资料{i + 1}] {chunk}" for i, (_, chunk, _) in enumerate(results)
     )
     return (
-        "你是一个校园信息助手。请只根据下面提供的资料回答问题，不要编造。\n"
-        "如果资料里没有答案，请在第一行输出【无答案】，再给出一句话说明。\n"
+        "你是一个校园信息助手。请依据下面提供的资料回答用户的问题，不要编造。\n"
+        "只要资料中包含与问题相关的信息，就必须直接回答，不得回复'没有相关信息'或输出【无答案】。\n"
+        "如果资料与问题相关但不完整，请基于现有资料尽力回答，并补充说明哪些细节资料中没有。\n"
+        "只有当资料与问题完全无关、确实没有任何相关信息时，才在第一行输出【无答案】。\n"
         "请用中文回答，先给出最直接的结论，再分点补充细节；\n"
         "尽量覆盖资料中与该问题相关的所有要点，不要遗漏关键规则（如名额、成绩、时间、条件等）。\n"
         "回答末尾请列出参考的资料编号。\n\n"
@@ -93,7 +95,7 @@ def answer(question: str, top_k: int = TOP_K):
     resp = client.chat.completions.create(
         model=MODEL_NAME,
         messages=[
-            {"role": "system", "content": "你是一个严谨的校园信息助手，只依据给定资料回答。"},
+            {"role": "system", "content": "你是一个乐于助人的校园信息助手，请依据给定资料回答用户的问题。"},
             {"role": "user", "content": prompt},
         ],
         temperature=0.3,  # 低温度 = 更稳定、更少自由发挥
